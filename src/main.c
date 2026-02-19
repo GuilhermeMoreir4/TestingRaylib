@@ -16,93 +16,153 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
-#define PLAYER_VELOCITY 2
+#define PLAYER_VELOCITY 200
+
+#define SPRITE_SIZE 48
 
 void draw_money(const char* ptr){
 	DrawText(ptr, WINDOW_WIDTH - 100, 10,20,WHITE);
 };
 
-typedef struct player {
-	int pos_x;
-	int pos_y;
-	Texture texture;
+typedef struct PlayerTexture{
+	Rectangle rectangle;
+	Texture2D sprite_sheet;
+}PlayerTexture;
 
+typedef enum PlayerDirection{
+	BACKWARD = 0,
+	FORWARD= 1,
+	LEFT = 2,
+	RIGHT = 3
+}PlayerDirection;
+
+typedef struct PlayerAnimation{
+	bool is_moving;
+	PlayerDirection direction; 
+	float animation_duration;
+	float elapsed_time;
+}PlayerAnimation;
+
+typedef struct Player {
+	Vector2 position;
+	PlayerTexture texture;
+	PlayerAnimation animation;
 } Player;
 
 Player* create_player(const char* texture_path, int pos_x,int pos_y){
 	Player* my_player = malloc(sizeof(Player));
+	int frame = 1;
+	int* frame_ptr = &frame;
 
-	if(!my_player )return NULL;
+	if(!my_player)return NULL;
+	
 
-	my_player->pos_x = pos_x;
-	my_player->pos_y = pos_y;
-	my_player->texture = LoadTexture(texture_path);
+	Rectangle player_texture_rec = {0,0, SPRITE_SIZE ,SPRITE_SIZE};
 
+	my_player->position.x = pos_x;
+	my_player->position.y = pos_y;
+	my_player->texture.sprite_sheet = LoadTexture(texture_path);
+	my_player->texture.rectangle = player_texture_rec;
+	my_player->animation.elapsed_time = 0;
+	my_player->animation.animation_duration = .5;
 
 	return my_player;
 }
 
 void destroy_player(Player* player){
-	UnloadTexture(player->texture);
+	UnloadTexture(player->texture.sprite_sheet);
 	free(player);
 }
 
 void handle_player_movement(Player* player){
+		float delta_time = GetFrameTime();
+
 		if (IsKeyDown(KEY_A)){
-			player->pos_x -= PLAYER_VELOCITY;
+			player->position.x += PLAYER_VELOCITY * delta_time;
+
+			player->animation.is_moving = true;
+			player->animation.direction = LEFT;
+			return;
 		}
 
 		if (IsKeyDown(KEY_D)){
-			player->pos_x += PLAYER_VELOCITY;
+			player->position.x -= PLAYER_VELOCITY * delta_time;
+
+			player->animation.is_moving = true;
+			player->animation.direction = RIGHT;
+			return;
 		}
 
 		if (IsKeyDown(KEY_W)){
-			player->pos_y -= PLAYER_VELOCITY;
+			player->position.y += PLAYER_VELOCITY * delta_time;
+
+			player->animation.is_moving = true;
+			player->animation.direction = FORWARD;
+			return;
+
 		}
+
 		if (IsKeyDown(KEY_S)){
-			player->pos_y += PLAYER_VELOCITY;
+			player->position.y -= PLAYER_VELOCITY * delta_time;
+
+			player->animation.is_moving = true;
+			player->animation.direction = BACKWARD;
+			return;
+
 		}
+
+		player->animation.is_moving = false;	
+}
+
+
+void animate_player_movement(Player* player){
+	if(player->animation.is_moving){
+		float time = GetFrameTime();
+		player->texture.rectangle.y = SPRITE_SIZE * player->animation.direction;
+
+		if(player->texture.rectangle.x < SPRITE_SIZE * 3){
+			if (player->animation.elapsed_time > player->animation.animation_duration){
+				player->texture.rectangle.x += SPRITE_SIZE;
+				player->animation.elapsed_time = 0;
+			}else{
+				player->animation.elapsed_time += time;
+			}
+		}else{
+			player->texture.rectangle.x = 0;
+		}
+		return;
+	}
+	player->texture.rectangle.y = SPRITE_SIZE * player->animation.direction;
+	player->texture.rectangle.x = 0;
 }
 
 int main ()
 {
-	// Tell the window to use vsync and work on high DPI displays
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 
-	// Create the window and OpenGL context
 	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Hello Raylib");
 
-	// Utility function from resource_dir.h to find the resources folder and set it as the current working directory so we can load from it
 	SearchAndSetResourceDir("resources");
-	Player* player = create_player("wabbit_alpha.png",20,20);
+	Player* player = create_player("character/basic_move_sprite_sheet.png",32,32);
 
-	// Load a texture from the resources directory
-
-	// game loop
-	while (!WindowShouldClose())		// run the loop until the user presses ESCAPE or presses the Close button on the window
-	{
-		// drawing
+	float elepased_frames = 0;
+	
+	while (!WindowShouldClose())			{
+		handle_player_movement(player);
+		animate_player_movement(player);
 		BeginDrawing();
 
-		// Setup the back buffer for drawing (clear color and depth buffers)
 		ClearBackground(BLACK);
 
-		// draw some text using the default font
 		DrawText("Hello Raylib", 200,200,20,WHITE);
 		draw_money("R$ + 250");
-		// draw our texture to the screen
-		handle_player_movement(player);
-		DrawTexture(player->texture, player->pos_x, player->pos_y, WHITE);
+		Rectangle size = {0,0, SPRITE_SIZE * 4,SPRITE_SIZE * 4};
+		DrawTexturePro(player->texture.sprite_sheet, player->texture.rectangle,size,player->position,0,WHITE);
 		
-		// end the frame and get ready for the next one  (display frame, poll input, etc...)
 		EndDrawing();
 	}
 
-	// cleanup
-	// unload our texture so it can be cleaned up
 	destroy_player(player);
-
-	// destroy the window and cleanup the OpenGL context
 	CloseWindow();
 	return 0;
 }
