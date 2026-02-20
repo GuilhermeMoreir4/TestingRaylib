@@ -13,9 +13,6 @@ Animation* new_animation(int sprite_line,int frames,float animation_duration, in
 	return animation;
 }
 
-
-
-
 void play_animation(Animation* animation,Rectangle* rectangle,float* delta_time){
 	rectangle->y = animation->sprite_line * animation->sprite_size;
 
