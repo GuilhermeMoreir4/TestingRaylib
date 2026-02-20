@@ -27,6 +27,7 @@ void draw_money(const char* ptr){
 typedef struct PlayerTexture{
 	Rectangle rectangle;
 	Texture2D sprite_sheet;
+	Rectangle size;
 }PlayerTexture;
 
 typedef enum PlayerDirection{
@@ -36,18 +37,33 @@ typedef enum PlayerDirection{
 	RIGHT = 3
 }PlayerDirection;
 
-typedef struct PlayerAnimation{
-	bool is_moving;
-	PlayerDirection direction; 
+typedef struct Animation{
+	int sprite_line;
+	int frames;
+	int current_frame;
+	int sprite_size; 
 	float animation_duration;
 	float elapsed_time;
-}PlayerAnimation;
+}Animation;
+
+Animation* new_animation(int sprite_line,int frames,float animation_duration, int sprite_size){
+	Animation* animation = malloc(sizeof(Animation));
+	animation->animation_duration = animation_duration;
+	animation->elapsed_time = 0;
+	animation->frames = frames - 1;
+	animation->sprite_line = sprite_line - 1;
+	animation->sprite_size = sprite_size;
+	animation->current_frame = 0;
+	return animation;
+}
 
 typedef struct Player {
 	Vector2 position;
 	PlayerTexture texture;
-	PlayerAnimation animation;
+	Animation* animations;
 } Player;
+
+
 
 Player* create_player(const char* texture_path, int pos_x,int pos_y){
 	Player* my_player = malloc(sizeof(Player));
@@ -63,8 +79,16 @@ Player* create_player(const char* texture_path, int pos_x,int pos_y){
 	my_player->position.y = pos_y;
 	my_player->texture.sprite_sheet = LoadTexture(texture_path);
 	my_player->texture.rectangle = player_texture_rec;
-	my_player->animation.elapsed_time = 0;
-	my_player->animation.animation_duration = .5;
+	Rectangle size = {0,0, SPRITE_SIZE * 4,SPRITE_SIZE * 4};
+	my_player->texture.size = size;
+	
+	my_player->animations = malloc(4*sizeof(Animation));
+
+
+	my_player->animations[0] = *new_animation(1,4,1,SPRITE_SIZE);
+	my_player->animations[1] = *new_animation(2,4,1,SPRITE_SIZE);
+	my_player->animations[2]= *new_animation(3,4,1,SPRITE_SIZE);
+	my_player->animations[3] = *new_animation(4,4,1,SPRITE_SIZE);
 
 	return my_player;
 }
@@ -74,66 +98,57 @@ void destroy_player(Player* player){
 	free(player);
 }
 
+
+
+void play_animation(Animation* animation,Rectangle* rectangle,float* delta_time){
+	rectangle->y = animation->sprite_line * animation->sprite_size;
+
+	if(animation->current_frame < animation->frames){
+		if (animation->elapsed_time > animation->animation_duration){
+			animation->current_frame ++;
+			rectangle->x += animation->sprite_size;
+			animation->elapsed_time = 0;
+		}else{
+			animation->elapsed_time += *delta_time;
+		}
+	}else{
+		animation->current_frame = 0;
+		rectangle->x = 0;
+	}
+};
+
+void pause_animation(Animation* animation,Rectangle* rectangle){
+	rectangle->y = animation->sprite_line;
+	rectangle->x = 0;
+}
+
+
 void handle_player_movement(Player* player){
 		float delta_time = GetFrameTime();
 
 		if (IsKeyDown(KEY_A)){
 			player->position.x += PLAYER_VELOCITY * delta_time;
-
-			player->animation.is_moving = true;
-			player->animation.direction = LEFT;
-			return;
+			play_animation(&player->animations[2],&player->texture.rectangle,&delta_time);
 		}
 
 		if (IsKeyDown(KEY_D)){
 			player->position.x -= PLAYER_VELOCITY * delta_time;
-
-			player->animation.is_moving = true;
-			player->animation.direction = RIGHT;
-			return;
+			play_animation(&player->animations[3],&player->texture.rectangle,&delta_time);
 		}
 
 		if (IsKeyDown(KEY_W)){
 			player->position.y += PLAYER_VELOCITY * delta_time;
-
-			player->animation.is_moving = true;
-			player->animation.direction = FORWARD;
-			return;
-
+			play_animation(&player->animations[1],&player->texture.rectangle,&delta_time);
 		}
 
 		if (IsKeyDown(KEY_S)){
 			player->position.y -= PLAYER_VELOCITY * delta_time;
-
-			player->animation.is_moving = true;
-			player->animation.direction = BACKWARD;
-			return;
-
+			play_animation(&player->animations[0],&player->texture.rectangle,&delta_time);
 		}
 
-		player->animation.is_moving = false;	
-}
-
-
-void animate_player_movement(Player* player){
-	if(player->animation.is_moving){
-		float time = GetFrameTime();
-		player->texture.rectangle.y = SPRITE_SIZE * player->animation.direction;
-
-		if(player->texture.rectangle.x < SPRITE_SIZE * 3){
-			if (player->animation.elapsed_time > player->animation.animation_duration){
-				player->texture.rectangle.x += SPRITE_SIZE;
-				player->animation.elapsed_time = 0;
-			}else{
-				player->animation.elapsed_time += time;
-			}
-		}else{
-			player->texture.rectangle.x = 0;
+		if(IsKeyReleased(KEY_S)){
+		 pause_animation(&player->animations[0],&player->texture.rectangle);
 		}
-		return;
-	}
-	player->texture.rectangle.y = SPRITE_SIZE * player->animation.direction;
-	player->texture.rectangle.x = 0;
 }
 
 int main ()
@@ -149,15 +164,13 @@ int main ()
 	
 	while (!WindowShouldClose())			{
 		handle_player_movement(player);
-		animate_player_movement(player);
 		BeginDrawing();
-
 		ClearBackground(BLACK);
 
 		DrawText("Hello Raylib", 200,200,20,WHITE);
 		draw_money("R$ + 250");
-		Rectangle size = {0,0, SPRITE_SIZE * 4,SPRITE_SIZE * 4};
-		DrawTexturePro(player->texture.sprite_sheet, player->texture.rectangle,size,player->position,0,WHITE);
+		
+		DrawTexturePro(player->texture.sprite_sheet, player->texture.rectangle,player->texture.size,player->position,0,WHITE);
 		
 		EndDrawing();
 	}
