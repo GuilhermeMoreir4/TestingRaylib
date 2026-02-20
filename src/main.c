@@ -1,18 +1,11 @@
-/*
-Raylib example file.
-This is an example main file for a simple raylib project.
-Use this as a starting point or replace it with your code.
-
-by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit https://creativecommons.org/publicdomain/zero/1.0/
-
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "raylib.h"
 
 #include "resource_dir.h"
+
+#include "core/animation_system.h"
 
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
@@ -37,25 +30,6 @@ typedef enum PlayerDirection{
 	RIGHT = 3
 }PlayerDirection;
 
-typedef struct Animation{
-	int sprite_line;
-	int frames;
-	int current_frame;
-	int sprite_size; 
-	float animation_duration;
-	float elapsed_time;
-}Animation;
-
-Animation* new_animation(int sprite_line,int frames,float animation_duration, int sprite_size){
-	Animation* animation = malloc(sizeof(Animation));
-	animation->animation_duration = animation_duration;
-	animation->elapsed_time = 0;
-	animation->frames = frames - 1;
-	animation->sprite_line = sprite_line - 1;
-	animation->sprite_size = sprite_size;
-	animation->current_frame = 0;
-	return animation;
-}
 
 typedef struct Player {
 	Vector2 position;
@@ -95,32 +69,11 @@ Player* create_player(const char* texture_path, int pos_x,int pos_y){
 
 void destroy_player(Player* player){
 	UnloadTexture(player->texture.sprite_sheet);
+	free(player->animations);
 	free(player);
 }
 
 
-
-void play_animation(Animation* animation,Rectangle* rectangle,float* delta_time){
-	rectangle->y = animation->sprite_line * animation->sprite_size;
-
-	if(animation->current_frame < animation->frames){
-		if (animation->elapsed_time > animation->animation_duration){
-			animation->current_frame ++;
-			rectangle->x += animation->sprite_size;
-			animation->elapsed_time = 0;
-		}else{
-			animation->elapsed_time += *delta_time;
-		}
-	}else{
-		animation->current_frame = 0;
-		rectangle->x = 0;
-	}
-};
-
-void pause_animation(Animation* animation,Rectangle* rectangle){
-	rectangle->y = animation->sprite_line;
-	rectangle->x = 0;
-}
 
 
 void handle_player_movement(Player* player){
@@ -149,6 +102,18 @@ void handle_player_movement(Player* player){
 		if(IsKeyReleased(KEY_S)){
 		 pause_animation(&player->animations[0],&player->texture.rectangle);
 		}
+
+		if(IsKeyReleased(KEY_W)){
+		 pause_animation(&player->animations[1],&player->texture.rectangle);
+		}
+
+		if(IsKeyReleased(KEY_D)){
+		 pause_animation(&player->animations[3],&player->texture.rectangle);
+		}
+
+		if(IsKeyReleased(KEY_A)){
+		 pause_animation(&player->animations[2],&player->texture.rectangle);
+		}
 }
 
 int main ()
@@ -162,7 +127,7 @@ int main ()
 
 	float elepased_frames = 0;
 	
-	while (!WindowShouldClose())			{
+	while (!WindowShouldClose()){
 		handle_player_movement(player);
 		BeginDrawing();
 		ClearBackground(BLACK);
