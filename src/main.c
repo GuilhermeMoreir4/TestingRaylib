@@ -57,7 +57,7 @@ int main ()
 
 		submit(wheat.object->drawable,wheat.object->transform,0);
 		// submit(beet.object->drawable);
-		submit(player.object->drawable,player.object->transform,0);
+		submit(player.object->drawable,player.object->transform,1);
 
 
 		DrawText("Hello Raylib", 200,200,20,WHITE);

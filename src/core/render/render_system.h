@@ -2,6 +2,7 @@
 #define RENDER_SYSTEM_H
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "drawable.h"
 #include "core/transform/kg_transform.h"

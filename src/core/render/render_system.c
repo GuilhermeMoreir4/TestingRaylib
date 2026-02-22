@@ -29,8 +29,20 @@ void submit(Drawable drawable,KGTransform transform,int layer){
     renderQueue.count++;
 };
 
+int queue_comparator(const void* a,const void* b) {
+    QueueElement* element_a = (QueueElement*) a;
+    QueueElement* element_b = (QueueElement*) b;
+
+  	return element_a->layer - element_b->layer;
+}
+
+void sort_queue(){
+    qsort(renderQueue.queue, renderQueue.count, sizeof(QueueElement), queue_comparator);
+}
 
 void flush(){
+
+    sort_queue();
 
     for (int draw_index = 0; draw_index < renderQueue.count; draw_index++){
         QueueElement draw = renderQueue.queue[draw_index];
