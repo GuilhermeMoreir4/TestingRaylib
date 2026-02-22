@@ -2,9 +2,11 @@
 #define PLAYER_H
 
 #include "raylib.h"
-#include "core/animation_system.h"
+#include "core/animation/animation_system.h"
 #include <stdlib.h>
-
+#include "core/object.h"
+#include "core/render/drawable.h"
+#include "core/transform/kg_transform.h"
 
 typedef struct PlayerTexture{
 	Rectangle rectangle;
@@ -21,14 +23,13 @@ typedef enum PlayerDirection{
 
 
 typedef struct Player {
-	Vector2 position;
-	PlayerTexture texture;
+	Object* object;
 	Animation* animations;
 } Player;
 
-void handle_player_movement(Player* player);
+void handle_player_movement(Player* player,float delta_time);
 
-Player* create_player(const char* texture_path, int pos_x,int pos_y);
+Player create_player(const char* texture_path, int pos_x,int pos_y);
 
 void destroy_player(Player* player);
 #endif

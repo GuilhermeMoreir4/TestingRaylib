@@ -205,6 +205,7 @@ if (downloadRaylib) then
         filter{}
         
         includedirs { "../src" }
+        includedirs { "../src/core/**" }
         includedirs { "../include" }
 
         links {"raylib"}

@@ -1,43 +1,44 @@
-#include "raylib.h"
-#include "core/animation_system.h"
-#include <stdlib.h>
 #include "player.h"
+
+#include "raylib.h"
+
+#include <stdlib.h>
+
 
 #define PLAYER_VELOCITY 200
 #define SPRITE_SIZE 48
 
+static Texture2D texture;
 
+Player create_player(const char* texture_path, int pos_x,int pos_y){
+	Animation* animation = malloc(4 * sizeof(Animation));
+	texture = LoadTexture(texture_path);
 
-Player* create_player(const char* texture_path, int pos_x,int pos_y){
-	Player* my_player = malloc(sizeof(Player));
-	int frame = 1;
-	int* frame_ptr = &frame;
+	animation[BACKWARD] = new_animation(1,4,1,SPRITE_SIZE);
+	animation[FORWARD] = new_animation(2,4,1,SPRITE_SIZE);
+	animation[LEFT]= new_animation(3,4,1,SPRITE_SIZE);
+	animation[RIGHT] = new_animation(4,4,1,SPRITE_SIZE);
 
-	if(!my_player)return NULL;
-	
+	Rectangle texutre_source = {0,0, SPRITE_SIZE ,SPRITE_SIZE};
 
-	Rectangle player_texture_rec = {0,0, SPRITE_SIZE ,SPRITE_SIZE};
-
-	my_player->position.x = pos_x;
-	my_player->position.y = pos_y;
-	my_player->texture.sprite_sheet = LoadTexture(texture_path);
-	my_player->texture.rectangle = player_texture_rec;
-	Rectangle size = {0,0, SPRITE_SIZE * 4,SPRITE_SIZE * 4};
-	my_player->texture.size = size;
-	
-	my_player->animations = malloc(4*sizeof(Animation));
-
-
-	my_player->animations[BACKWARD] = *new_animation(1,4,1,SPRITE_SIZE);
-	my_player->animations[FORWARD] = *new_animation(2,4,1,SPRITE_SIZE);
-	my_player->animations[LEFT]= *new_animation(3,4,1,SPRITE_SIZE);
-	my_player->animations[RIGHT] = *new_animation(4,4,1,SPRITE_SIZE);
-
-	return my_player;
+	return (Player){
+		 .object = create_object(
+                    (KGTransform){
+                        .position= (Vector2){.x=pos_x,.y=pos_y},
+                        .scale=    (Vector2){.x=4 * SPRITE_SIZE,.y=4 * SPRITE_SIZE},
+                        .rotation= (Vector2){.x=0,.y=0}
+                    },
+                    (Drawable){
+                        .source= texutre_source,
+                        .sprite_sheet= texture
+                    }
+                ),
+		.animations= animation
+	};
 }
 
 void destroy_player(Player* player){
-	UnloadTexture(player->texture.sprite_sheet);
+	UnloadTexture(player->object->drawable.sprite_sheet);
 	free(player->animations);
 	free(player);
 }
@@ -45,42 +46,41 @@ void destroy_player(Player* player){
 
 
 
-void handle_player_movement(Player* player){
-		float delta_time = GetFrameTime();
+void handle_player_movement(Player* player,float delta_time){
 
 		if (IsKeyDown(KEY_A)){
-			player->position.x += PLAYER_VELOCITY * delta_time;
-			play_animation(&player->animations[LEFT],&player->texture.rectangle,&delta_time);
+			player->object->transform.position.x += PLAYER_VELOCITY * delta_time;
+			play_animation(&player->animations[LEFT],&player->object->drawable.source,delta_time);
 		}
 
 		if (IsKeyDown(KEY_D)){
-			player->position.x -= PLAYER_VELOCITY * delta_time;
-			play_animation(&player->animations[RIGHT],&player->texture.rectangle,&delta_time);
+			player->object->transform.position.x -= PLAYER_VELOCITY * delta_time;
+			play_animation(&player->animations[RIGHT],&player->object->drawable.source,delta_time);
 		}
 
 		if (IsKeyDown(KEY_W)){
-			player->position.y += PLAYER_VELOCITY * delta_time;
-			play_animation(&player->animations[FORWARD],&player->texture.rectangle,&delta_time);
+			player->object->transform.position.y += PLAYER_VELOCITY * delta_time;
+			play_animation(&player->animations[FORWARD],&player->object->drawable.source,delta_time);
 		}
 
 		if (IsKeyDown(KEY_S)){
-			player->position.y -= PLAYER_VELOCITY * delta_time;
-			play_animation(&player->animations[BACKWARD],&player->texture.rectangle,&delta_time);
+			player->object->transform.position.y -= PLAYER_VELOCITY * delta_time;
+			play_animation(&player->animations[BACKWARD],&player->object->drawable.source,delta_time);
 		}
 
 		if(IsKeyReleased(KEY_S)){
-		 pause_animation(&player->animations[BACKWARD],&player->texture.rectangle);
+		 pause_animation(&player->animations[BACKWARD],&player->object->drawable.source);
 		}
 
 		if(IsKeyReleased(KEY_W)){
-		 pause_animation(&player->animations[FORWARD],&player->texture.rectangle);
+		 pause_animation(&player->animations[FORWARD],&player->object->drawable.source);
 		}
 
 		if(IsKeyReleased(KEY_D)){
-		 pause_animation(&player->animations[RIGHT],&player->texture.rectangle);
+		 pause_animation(&player->animations[RIGHT],&player->object->drawable.source);
 		}
 
 		if(IsKeyReleased(KEY_A)){
-		 pause_animation(&player->animations[LEFT],&player->texture.rectangle);
+		 pause_animation(&player->animations[LEFT],&player->object->drawable.source);
 		}
 }

@@ -1,6 +1,9 @@
 #ifndef ANIMATION_SYSTEM_H
 #define ANIMATION_SYSTEM_H
 
+#include <stdlib.h>
+#include "raylib.h"
+
 typedef struct Animation{
 	int sprite_line;
 	int frames;
@@ -10,10 +13,10 @@ typedef struct Animation{
 	float elapsed_time;
 }Animation;
 
-Animation* new_animation(int sprite_line,int frames,float animation_duration, int sprite_size);
+Animation new_animation(int sprite_line,int frames,float animation_duration, int sprite_size);
 
 void pause_animation(Animation* animation,Rectangle* rectangle);
 
-void play_animation(Animation* animation,Rectangle* rectangle,float* delta_time);
+void play_animation(Animation* animation,Rectangle* rectangle,float delta_time);
 
 #endif
