@@ -14,7 +14,7 @@ void begin_frame(){
 }
 
 
-void submit(Drawable drawable,KGTransform transform,int layer){
+void submit(Drawable* drawable,KGTransform* transform,int layer){
     if(renderQueue.count == MAX_QUEUE_SIZE){
         printf("QUEUE FOR DRAW IS FULL");
         return;
@@ -46,12 +46,12 @@ void flush(){
 
     for (int draw_index = 0; draw_index < renderQueue.count; draw_index++){
         QueueElement draw = renderQueue.queue[draw_index];
-       
+        
 		DrawTexturePro(
-            draw.drawable.sprite_sheet,
-            draw.drawable.source,
-            (Rectangle) {0,0,draw.transform.scale.x, draw.transform.scale.y},
-            draw.transform.position,
+            draw.drawable->sprite_sheet,
+            draw.drawable->source,
+            (Rectangle) {0,0,draw.transform->scale.x, draw.transform->scale.y},
+            draw.transform->position,
             0,
             WHITE
         );

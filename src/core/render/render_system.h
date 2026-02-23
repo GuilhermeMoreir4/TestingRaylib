@@ -9,15 +9,15 @@
 
 
 typedef struct{
-    Drawable drawable;
+    Drawable* drawable;
+    KGTransform* transform;
     int layer;
-    KGTransform transform;
 }QueueElement;
 
 
 void begin_frame();
 
-void submit(Drawable drawable,KGTransform transform,int layer);
+void submit(Drawable* drawable,KGTransform* transform,int layer);
 
 void flush();
 

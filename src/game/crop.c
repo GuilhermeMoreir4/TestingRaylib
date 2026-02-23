@@ -10,20 +10,23 @@
 
 static Texture2D texture;
 
-Crop create_crop(CropType type){
+Crop create_crop(CropType type,float position_x, float position_y){
     texture = LoadTexture("crops/basic_plants.png");
 
     switch(type){
         case WHEAT:
-            Rectangle texutre_source = {SPRITE_SIZE * 2,0, SPRITE_SIZE ,SPRITE_SIZE};
+            Rectangle texutre_source = {SPRITE_SIZE*4,0, SPRITE_SIZE ,SPRITE_SIZE};
 
             printf("INFO: CRIANDO O TRIGO");
+
+
+
             return (Crop) {
                 .elapsed_growth_time = 0, 
                 .growth_time = 10, 
                 .object = create_object(
                     (KGTransform){
-                        .position= (Vector2){.x=-20,.y=0},
+                        .position= (Vector2){.x=position_x,.y=position_y},
                         .scale=    (Vector2){.x=4 * SPRITE_SIZE, .y=4 * SPRITE_SIZE},
                         .rotation= (Vector2){.x=0,.y=0}
                     },

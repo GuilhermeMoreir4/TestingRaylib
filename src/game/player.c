@@ -11,6 +11,7 @@
 static Texture2D texture;
 
 Player create_player(const char* texture_path, int pos_x,int pos_y){
+	Player player;
 	Animation* animation = malloc(4 * sizeof(Animation));
 	texture = LoadTexture(texture_path);
 
@@ -21,20 +22,21 @@ Player create_player(const char* texture_path, int pos_x,int pos_y){
 
 	Rectangle texutre_source = {0,0, SPRITE_SIZE ,SPRITE_SIZE};
 
-	return (Player){
-		 .object = create_object(
-                    (KGTransform){
+	KGTransform transform = {
                         .position= (Vector2){.x=pos_x,.y=pos_y},
                         .scale=    (Vector2){.x=4 * SPRITE_SIZE,.y=4 * SPRITE_SIZE},
                         .rotation= (Vector2){.x=0,.y=0}
-                    },
-                    (Drawable){
+    };
+
+	Drawable drawable = {
                         .source= texutre_source,
                         .sprite_sheet= texture
-                    }
-                ),
-		.animations= animation
-	};
+    };
+
+
+	player.object = create_object(transform,drawable);
+	player.animations = animation;
+	return player;
 }
 
 void destroy_player(Player* player){
