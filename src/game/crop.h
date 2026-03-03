@@ -2,6 +2,8 @@
 #define CROP_H
 
 #include "core/object.h"
+#include "core/colission/kg_colission.h"
+
 
 typedef enum{
     WHEAT = 1,
@@ -12,6 +14,7 @@ typedef enum{
 typedef struct
 {
     Object* object;
+    KGCollidable collider;
     float growth_time;
     float elapsed_growth_time;
 }Crop;

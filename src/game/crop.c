@@ -20,21 +20,31 @@ Crop create_crop(CropType type,float position_x, float position_y){
             printf("INFO: CRIANDO O TRIGO");
 
 
-
-            return (Crop) {
-                .elapsed_growth_time = 0, 
-                .growth_time = 10, 
-                .object = create_object(
+            Crop crop;
+            crop.elapsed_growth_time = 0;
+            crop.growth_time = 10;
+            crop.object = create_object(
                     (KGTransform){
                         .position= (Vector2){.x=position_x,.y=position_y},
-                        .scale=    (Vector2){.x=4 * SPRITE_SIZE, .y=4 * SPRITE_SIZE},
+                        .scale=    (Vector2){.x=4, .y=4},
                         .rotation= (Vector2){.x=0,.y=0}
                     },
                     (Drawable){
                         .source= texutre_source,
                         .sprite_sheet= texture
-                    }
-                )};
+            });
+            
+            crop.collider = (KGCollidable){
+                .x = crop.object->transform.position.x,
+                .y = crop.object->transform.position.y,
+                .width = 50,
+                .height = 50,
+                .offset_x = 10,
+                .offset_y = 10,
+            };
+
+        return crop;
+        
         case BEET:
             return (Crop){
                 .elapsed_growth_time = 0, 

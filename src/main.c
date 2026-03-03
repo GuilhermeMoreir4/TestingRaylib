@@ -14,11 +14,16 @@
 #include "game/crop.h"
 
 
+#include "core/colission/colission_system.h"
 
 void draw_money(const char* ptr){
 	DrawText(ptr, WINDOW_WIDTH - 100, 10,20,WHITE);
 };
 
+
+void draw_collider_box(KGCollidable* collidable,Color color){
+	DrawRectangleLines(collidable->x,collidable->y,collidable->width,collidable->height,color);
+}
 
 
 int main ()
@@ -29,17 +34,16 @@ int main ()
 
 	SearchAndSetResourceDir("resources");
 
-
 	float elepased_frames = 0;
 	
-	Crop wheat = create_crop(WHEAT,-100,-40);
-	Crop wheat_2 = create_crop(WHEAT,-130,-40);
+	Crop wheat = create_crop(WHEAT,100, WINDOW_HEIGHT/2);
+	// Crop wheat_2 = create_crop(WHEAT,-130,-40);
 	
-	Player player = create_player("character/basic_move_sprite_sheet.png",32,32);
+	Player player = create_player("character/basic_move_sprite_sheet.png",100, WINDOW_HEIGHT/2);
 
 	printf("Transform:{%d,%d}", player.object->transform.position.x, player.object->transform.position.y);
 
-	Crop beet = create_crop(BEET, -100,-40);
+	Crop beet = create_crop(BEET, 140,-100);
 	
 
 	while (!WindowShouldClose()){
@@ -49,10 +53,14 @@ int main ()
 		BeginDrawing();
 		ClearBackground((Color){ 164, 194, 99, 255 });
 		
+
+		check_collision(&player.collider, &wheat.collider);
+
+
 		begin_frame();
 
 		submit(&wheat.object->drawable,&wheat.object->transform,1);
-		submit(&wheat_2.object->drawable,&wheat_2.object->transform,1);
+		// submit(&wheat_2.object->drawable,&wheat_2.object->transform,1);
 
 
 		// submit(beet.object->drawable);
@@ -62,10 +70,15 @@ int main ()
 
 		DrawText("Hello Raylib", 200,200,20,WHITE);
 		DrawText(TextFormat("x: %f, y: %f",player.object->transform.position.x, player.object->transform.position.y), WINDOW_WIDTH - 500, 10,20,WHITE);
-
+		
+		
+		
 		draw_money("R$ + 250");
 		
 		flush();
+
+		draw_collider_box(&player.collider,(Color){ 34, 100, 34, 255 });
+		draw_collider_box(&wheat.collider,(Color){ 34, 100, 34, 255 });
 
 		EndDrawing();
 	}

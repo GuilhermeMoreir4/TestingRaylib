@@ -7,6 +7,7 @@
 #include "core/object.h"
 #include "core/render/drawable.h"
 #include "core/transform/kg_transform.h"
+#include "core/colission/kg_colission.h"
 
 typedef struct PlayerTexture{
 	Rectangle rectangle;
@@ -25,6 +26,7 @@ typedef enum PlayerDirection{
 typedef struct Player {
 	Object* object;
 	Animation* animations;
+	KGCollidable collider;
 } Player;
 
 void handle_player_movement(Player* player,float delta_time);

@@ -24,7 +24,7 @@ Player create_player(const char* texture_path, int pos_x,int pos_y){
 
 	KGTransform transform = {
                         .position= (Vector2){.x=pos_x,.y=pos_y},
-                        .scale=    (Vector2){.x=4 * SPRITE_SIZE,.y=4 * SPRITE_SIZE},
+                        .scale=    (Vector2){.x=4,.y=4},
                         .rotation= (Vector2){.x=0,.y=0}
     };
 
@@ -36,6 +36,16 @@ Player create_player(const char* texture_path, int pos_x,int pos_y){
 
 	player.object = create_object(transform,drawable);
 	player.animations = animation;
+	
+	player.collider = (KGCollidable){
+		.x = pos_x,
+		.y = pos_y,
+		.width = 20,
+		.height = 10,
+		.offset_x = 40,
+		.offset_y = 70,
+	};
+
 	return player;
 }
 
@@ -49,24 +59,27 @@ void destroy_player(Player* player){
 
 
 void handle_player_movement(Player* player,float delta_time){
+		player->collider.x = player->object->transform.position.x + player->collider.offset_x;
+		player->collider.y = player->object->transform.position.y + player->collider.offset_y;
+
 
 		if (IsKeyDown(KEY_A)){
-			player->object->transform.position.x += PLAYER_VELOCITY * delta_time;
+			player->object->transform.position.x -= PLAYER_VELOCITY * delta_time;
 			play_animation(&player->animations[LEFT],&player->object->drawable.source,delta_time);
 		}
 
 		if (IsKeyDown(KEY_D)){
-			player->object->transform.position.x -= PLAYER_VELOCITY * delta_time;
+			player->object->transform.position.x += PLAYER_VELOCITY * delta_time;
 			play_animation(&player->animations[RIGHT],&player->object->drawable.source,delta_time);
 		}
 
 		if (IsKeyDown(KEY_W)){
-			player->object->transform.position.y += PLAYER_VELOCITY * delta_time;
+			player->object->transform.position.y -= PLAYER_VELOCITY * delta_time;
 			play_animation(&player->animations[FORWARD],&player->object->drawable.source,delta_time);
 		}
 
 		if (IsKeyDown(KEY_S)){
-			player->object->transform.position.y -= PLAYER_VELOCITY * delta_time;
+			player->object->transform.position.y += PLAYER_VELOCITY * delta_time;
 			play_animation(&player->animations[BACKWARD],&player->object->drawable.source,delta_time);
 		}
 

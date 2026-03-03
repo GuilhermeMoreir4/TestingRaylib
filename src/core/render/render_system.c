@@ -50,8 +50,8 @@ void flush(){
 		DrawTexturePro(
             draw.drawable->sprite_sheet,
             draw.drawable->source,
-            (Rectangle) {0,0,draw.transform->scale.x, draw.transform->scale.y},
-            draw.transform->position,
+            (Rectangle) {draw.transform->position.x,draw.transform->position.y,draw.transform->scale.x * draw.drawable->source.width, draw.transform->scale.y * draw.drawable->source.height},
+            (Vector2){draw.drawable->source.width,draw.drawable->source.height},
             0,
             WHITE
         );
