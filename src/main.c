@@ -23,8 +23,16 @@ void draw_money(const char* ptr){
 
 void draw_collider_box(KGCollidable* collidable,Color color){
 	DrawRectangleLines(collidable->x,collidable->y,collidable->width,collidable->height,color);
-}
+};
 
+
+void player_collision_func(){
+	printf("INFO: PLAYER HAS COLLIDED");
+};
+
+void crop_collision_func(){
+	printf("INFO: CROP HAS COLLIDED");
+};
 
 int main ()
 {
@@ -53,8 +61,11 @@ int main ()
 		BeginDrawing();
 		ClearBackground((Color){ 164, 194, 99, 255 });
 		
+		init_collision_system();
+		send_to_collision_queue(&player.collider,player_collision_func);
+		send_to_collision_queue(&wheat.collider,crop_collision_func);
 
-		check_collision(&player.collider, &wheat.collider);
+		handle_all_collisions();
 
 
 		begin_frame();

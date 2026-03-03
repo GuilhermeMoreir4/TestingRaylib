@@ -3,7 +3,9 @@
 
 #include "kg_colission.h"
 
-void check_collision(KGCollidable* source,KGCollidable* target);
-
+bool check_collision(KGCollidable* source,KGCollidable* target);
+void send_to_collision_queue(KGCollidable* collider, void (*callback)());
+void handle_all_collisions();
+void init_collision_system();
 
 #endif
